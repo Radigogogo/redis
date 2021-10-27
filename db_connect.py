@@ -1,23 +1,27 @@
 import pymssql
-conn = pymssql.connect(
+import redis
+
+# tic DB connection
+conn_ticdb = pymssql.connect(
     server='PC-RADI_MA',
     user='Radi',
     password='phison',
     database='TIC_DB'
 )
 
-cursor = conn.cursor(as_dict=True)
+conn_redis_params = {
+    'host' : '127.0.0.1',
+    'port' : 6379,
+    'db' : 0
+}
+conn_redis = redis.StrictRedis(**conn_redis_params )
+
+#tic DB select
+cursor = conn_ticdb.cursor(as_dict=True)
 cursor.execute('select top 10 * from [TIC_DB].[dbo].[Card_Info]')
-# for row in cursor:
-#     print(row[])
 print(cursor)
 for row in cursor :
     print(row)
 
-# field_name=[i[0] for i in cursor.description]
-# result=cursor.fetchall()
-# for row in result :
-#     print(row)
-
-
-conn.close()
+#close tic db connection
+conn_ticdb.close()
