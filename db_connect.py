@@ -5,7 +5,8 @@ def tic_db_conn():
     # tic DB connection
     try:
         conn_ticdb = pymssql.connect(
-            server='PC-RADI_MA',
+            #server='PC-RADI_MA', #need to change to your db server
+            server='127.0.0.1',
             user='Radi',
             password='phison',
             database='TIC_DB'
