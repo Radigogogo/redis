@@ -48,7 +48,7 @@ def getDataFromSQLServer():
         mval = ''
 
         for key,value in row.items():
-            
+
             if str(key)== 'CardInfo_ID':
                 mkey = str(key)+':'+str(value)
                 # print(str(key)+':'+str(value))
