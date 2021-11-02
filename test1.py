@@ -50,6 +50,7 @@ def tic_db_conn():
 
 
 
+
         #close tic db connection
         conn_ticdb.close()
     except Exception as e:
