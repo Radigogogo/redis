@@ -1,9 +1,10 @@
 import pymssql
 import redis
+from flask_sqlalchemy import SQLAlchemy
 
+# def set_redis_value(rkey_id,dicts):
+#     redis_conn()
 
-def set_redis_value():
-    pass
 
 
 def tic_db_conn():
@@ -43,22 +44,19 @@ def tic_db_conn():
 
             Select * 
             from  tt 
-            for json auto
         """
         cursor.execute(query)
-        list_dict = list(cursor)  #cursor type to list
-        print(type(list_dict))
+        query_result_list = cursor.fetchall()
         rkey_id = 0
-        for row in list_dict:   #row in list is dict
-            rval = row
-            rkey_id += 1
-            set_redis_value(rkey_id,rval)
-            print(rval)
+        for dicts in query_result_list:
+            if rkey_id == 0 :
+                print(type(dicts))
 
-        # print(type(cursor))
-        # print(cursor)
-        #load_json = json.loads(cursor)
-        #print('json:'+ load_json)
+            print('key = ' + str(rkey_id) + ' object = %r' % (dicts,))
+            rkey_id += 1
+            #set_redis_value(rkey_id,dicts)
+
+
 
         # close tic db connection
         conn_ticdb.close()
