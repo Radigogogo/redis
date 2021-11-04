@@ -41,7 +41,7 @@ func NewDB() *DB {
 	return &DB{redis: client, mssql: db}
 }
 
-type Table struct {
+type Data struct {
 	TL_ID             string `json:"TL_ID"`
 	Tester_ID         string `json:"Tester_ID"`
 	Test_Status       string `json:"Test_Status"`
@@ -79,24 +79,24 @@ func (d *DB) returnRedisAll(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Panic(err)
 		}
-		err = d.redis.Set(keyID, j, 5*time.Second).Err()
+		err = d.redis.Set(keyID, j, 500*time.Second).Err()
 		if err != nil {
 			log.Panic(err)
 		}
 
 		// Send The Headers and Payload
-		fmt.Println("MISS AND GET FROM DB")
+		//fmt.Println("MISS AND GET FROM DB")
 		json.NewEncoder(w).Encode(data)
 		return
 	}
 
 	// Send The Headers and Payload value From Redis Cache
-	fmt.Println("HIT AND GET FROM REDIS")
+	//fmt.Println("HIT AND GET FROM REDIS")
 	w.Write([]byte(val))
 
 }
 
-func (d *DB) getData() []*Table {
+func (d *DB) getData() []*Data {
 	rows, err := d.mssql.Query(`
 	with 
 	tt as(
@@ -126,10 +126,10 @@ func (d *DB) getData() []*Table {
 	}
 	defer rows.Close()
 
-	pls := make([]*Table, 0)
+	pls := make([]*Data, 0)
 
 	for rows.Next() {
-		pl := new(Table)
+		pl := new(Data)
 		if err := rows.Scan(&pl.TL_ID, &pl.Tester_ID, &pl.Test_Status, &pl.Running_StartTime, &pl.Test_End_Time, &pl.Test_Result, &pl.Test_Status_2, &pl.Tool_Name, &pl.Tool_Version, &pl.Pattern_Result, &pl.Pattern_Name, &pl.Pattern_Duration); err != nil {
 			panic(err)
 		}
@@ -150,7 +150,7 @@ func (d *DB) returnAll(w http.ResponseWriter, r *http.Request) {
 func main() {
 
 	db := NewDB()
-
+	log.Println("GOGOGO")
 	myRouter := mux.NewRouter().StrictSlash(true)
 	myRouter.HandleFunc("/", homePage)
 	myRouter.HandleFunc("/demo", db.returnAll)
