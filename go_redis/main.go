@@ -64,6 +64,8 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 
 func (d *DB) returnRedisAll(w http.ResponseWriter, r *http.Request) {
 
+	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
+
 	vars := mux.Vars(r)
 	keyID := vars["id"]
 	val, err := d.redis.Get(keyID).Result()
@@ -83,14 +85,14 @@ func (d *DB) returnRedisAll(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Send The Headers and Payload
-		//fmt.Println("MISS AND GET FROM DB")
+		fmt.Println("MISS AND GET FROM DB")
 		json.NewEncoder(w).Encode(data)
 		return
 	}
 
 	// Send The Headers and Payload value From Redis Cache
-	//fmt.Println("HIT AND GET FROM REDIS")
-	json.NewEncoder(w).Encode(val)
+	fmt.Println("HIT AND GET FROM REDIS")
+	w.Write([]byte(val))
 
 }
 
@@ -141,13 +143,14 @@ func (d *DB) getData() []*Table {
 
 func (d *DB) returnAll(w http.ResponseWriter, r *http.Request) {
 
+	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
 	json.NewEncoder(w).Encode(d.getData())
 }
 
 func main() {
 
 	db := NewDB()
-	log.Println("GOGOGO")
+
 	myRouter := mux.NewRouter().StrictSlash(true)
 	myRouter.HandleFunc("/", homePage)
 	myRouter.HandleFunc("/demo", db.returnAll)
