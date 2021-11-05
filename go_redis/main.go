@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/go-redis/redis"
-	"github.com/gorilla/mux"
+	"github.com/gorilla/mux"  // request router and dispatcher for matching incoming requests to their respective handler.
 
 	_ "github.com/denisenkom/go-mssqldb"
 )
@@ -62,6 +62,9 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 
 }
 
+//while client send request, ask redis first to check its data exist or not
+// if redis miss, restore requested data to redis from sql server
+// if redis hit ,
 func (d *DB) returnRedisAll(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
@@ -69,11 +72,11 @@ func (d *DB) returnRedisAll(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	keyID := vars["id"]
 	val, err := d.redis.Get(keyID).Result()
-	if err != nil {
+	if err != nil {     //redis miss
+
 		// Do Logical Here to Select data From Database
 		// And Set the Value from Database to Redis
-		// Set Expiration to 5 second
-
+		// Set Expiration to 500 second
 		data := d.getData()
 		j, err := json.Marshal(data)
 		if err != nil {
@@ -85,13 +88,13 @@ func (d *DB) returnRedisAll(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Send The Headers and Payload
-		//fmt.Println("MISS AND GET FROM DB")
+		fmt.Println("MISS AND GET FROM DB")
 		json.NewEncoder(w).Encode(data)
 		return
 	}
 
 	// Send The Headers and Payload value From Redis Cache
-	//fmt.Println("HIT AND GET FROM REDIS")
+	fmt.Println("HIT AND GET FROM REDIS")
 	w.Write([]byte(val))
 
 }
@@ -128,6 +131,7 @@ func (d *DB) getData() []*Data {
 
 	pls := make([]*Data, 0)
 
+    //把query從sql server取出來後 mapping到data structure(轉換成key value形式)
 	for rows.Next() {
 		pl := new(Data)
 		if err := rows.Scan(&pl.TL_ID, &pl.Tester_ID, &pl.Test_Status, &pl.Running_StartTime, &pl.Test_End_Time, &pl.Test_Result, &pl.Test_Status_2, &pl.Tool_Name, &pl.Tool_Version, &pl.Pattern_Result, &pl.Pattern_Name, &pl.Pattern_Duration); err != nil {
